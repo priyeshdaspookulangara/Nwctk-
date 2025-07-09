@@ -1,0 +1,233 @@
+/* Custom Frontend Styles for NGO Website */
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f8f9fa; /* A slightly lighter grey for body */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #0056b3 !important; /* Darker blue for brand */
+}
+
+.nav-link {
+    font-weight: 500;
+}
+.nav-item.active .nav-link {
+    color: #007bff !important; /* Bootstrap primary blue for active link */
+}
+
+
+.main-content {
+    background-color: #ffffff;
+    padding: 25px 15px; /* Consistent padding */
+    flex-grow: 1; /* Make content grow to push footer down */
+    border-radius: 0; /* Remove radius if using full-width sections often */
+}
+.container, .container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+
+.footer {
+    background-color: #343a40;
+    color: #f8f9fa;
+    padding: 2.5rem 0;
+    font-size: 0.9em;
+}
+
+.footer a {
+    color: #ced4da;
+}
+
+.footer a:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+.footer .list-inline-item:not(:last-child) {
+    margin-right: .7rem;
+}
+
+/* Page Headers */
+.page-header {
+    background: linear-gradient(to right, #007bff, #0056b3); /* Gradient for header */
+    color: white;
+    padding: 2.5rem 1rem;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    border-radius: 0; /* Full width */
+}
+.page-header h1 {
+    font-size: 2.8rem;
+    font-weight: bold; /* Bolder page titles */
+    margin-bottom: 0.5rem;
+}
+.page-header .lead {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+
+/* Cards customization */
+.card {
+    border: none; /* Remove default border */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08); /* Softer, more modern shadow */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border-radius: 0.3rem; /* Slightly more rounded corners */
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.card-title {
+    font-weight: 600; /* Semibold for card titles */
+    color: #333;
+}
+.card-img, .card-img-top {
+    border-top-left-radius: 0.3rem;
+    border-top-right-radius: 0.3rem;
+}
+.card-footer {
+    background-color: #f8f9fa; /* Light grey footer for cards */
+    border-top: 1px solid #e9ecef;
+}
+
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    border-radius: 0.25rem; /* Consistent border radius */
+    padding: 0.5rem 1rem; /* Slightly larger padding */
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    transition: background-color 0.2s ease;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+
+/* Forms */
+.form-control {
+    border-radius: 0.25rem;
+}
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+label {
+    font-weight: 500; /* Slightly bolder labels */
+}
+
+
+/* Testimonial specific styling */
+.card.testimonial-card .card-body {
+    padding: 1.5rem;
+}
+.testimonial-card .blockquote p {
+    font-size: 1rem; /* Slightly smaller for blockquote */
+    font-style: italic;
+}
+.testimonial-card .blockquote-footer {
+    font-size: 0.9rem;
+}
+.testimonial-card img.rounded-circle { /* Ensure image is styled if used */
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+}
+
+
+/* Gallery specific */
+.gallery-filter-nav .btn { /* Class for a div wrapping filter buttons */
+    margin: 0 5px 10px;
+}
+.gallery-item .card-body { /* Example if you add titles below gallery images */
+    padding: 0.75rem;
+}
+.gallery-item .card-title {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+
+/* Back to top button */
+#backToTopBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 50%; /* Make it circular */
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+#backToTopBtn:hover {
+    background-color: #0056b3;
+}
+
+
+/* Utility classes */
+.mt-60 { margin-top: 60px; }
+.mb-60 { margin-bottom: 60px; }
+.pt-60 { padding-top: 60px; }
+.pb-60 { padding-bottom: 60px; }
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        padding-top: 56px; /* Default navbar height */
+    }
+    .page-header h1 {
+        font-size: 2.2rem;
+    }
+    .page-header .lead {
+        font-size: 1rem;
+    }
+    .navbar-nav .nav-link {
+        padding-left: 15px; /* For better touch targets in collapsed menu */
+    }
+    .card-columns { /* If using card-columns for gallery or news */
+        column-count: 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+     .page-header .lead {
+        font-size: 0.9rem;
+    }
+}

@@ -3,6 +3,39 @@
 require_once '../includes/auth_check.php'; // Adjust path as necessary
 require_once '../includes/db.php';       // Database connection
 
+// --- Temporary Migration Logic ---
+// This will create the blog tables if they don't exist.
+// This is a workaround for not having shell access to run migration scripts.
+$migration_sql = "
+CREATE TABLE IF NOT EXISTS `blog_categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `blog_posts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `category_id` INT,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `image_url` VARCHAR(255) NULL,
+  `author` VARCHAR(255) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL
+);
+";
+
+if (!mysqli_multi_query($conn, $migration_sql)) {
+    // Handle error if migration fails - for now, we'll just log it.
+    error_log("Failed to apply migration: " . mysqli_error($conn));
+} else {
+    // To ensure all results from multi_query are consumed
+    while (mysqli_next_result($conn)) {;}
+}
+// --- End of Temporary Migration Logic ---
+
+
 // Page specific logic can go here. For dashboard, it might be stats.
 // For now, it's a simple welcome page.
 

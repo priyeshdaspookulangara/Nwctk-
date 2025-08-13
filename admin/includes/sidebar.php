@@ -43,6 +43,17 @@
             </ul>
         </li>
         <li>
+            <a href="#blogSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                <i class="fas fa-blog"></i>
+                Blog
+            </a>
+            <ul class="collapse list-unstyled" id="blogSubmenu">
+                <li><a href="manage_blog_posts.php">Manage Posts</a></li>
+                <li><a href="add_blog_post.php">Add Post</a></li>
+                <li><a href="manage_blog_categories.php">Manage Categories</a></li>
+            </ul>
+        </li>
+        <li>
             <a href="#projectsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                 <i class="fas fa-project-diagram"></i>
                 Projects

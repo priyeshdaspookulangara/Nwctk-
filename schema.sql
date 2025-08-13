@@ -137,3 +137,23 @@ INSERT INTO `admin_users` (`username`, `password`) VALUES ('admin', 'admin');
 -- Initial content for home and about pages
 INSERT INTO `page_content` (`page_name`, `content`) VALUES ('home', 'Welcome to our NGO! This is the default home page content. Please update it from the admin panel.');
 INSERT INTO `page_content` (`page_name`, `content`) VALUES ('about_us', 'This is the default About Us page content. Learn more about our mission and vision here. Please update it from the admin panel.');
+
+-- Blog Categories Table
+CREATE TABLE `blog_categories` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Blog Posts Table
+CREATE TABLE `blog_posts` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `category_id` INT,
+  `title` VARCHAR(255) NOT NULL,
+  `content` TEXT NOT NULL,
+  `image_url` VARCHAR(255) NULL,
+  `author` VARCHAR(255) NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL
+);

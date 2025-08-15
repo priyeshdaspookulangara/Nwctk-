@@ -2,22 +2,42 @@
 $page_title = "Contact Us";
 // The header include path needs to be adjusted because this file is in a subdirectory
 require_once '../includes/header.php';
-// Database connection (if needed for this page, e.g., for dynamic contact info)
-// For now, the form submission will be handled by a separate PHP script or this page itself.
-// require_once '../../includes/db.php'; // Path to DB from public/contact/index.php
+// Database connection
+require_once '../../includes/db.php';
+
+// Default contact details structure
+$contact_details = [
+    'ngo_name' => '[NGO Name]',
+    'address' => '123 Philanthropy Drive',
+    'city_state_zip' => 'Cityville, State 54321',
+    'country' => 'Country',
+    'phone' => '(123) 456-7890',
+    'email' => 'info@ngoname.org',
+    'website' => 'www.ngoname.org',
+    'office_hours_mf' => '9:00 AM - 5:00 PM',
+    'office_hours_ss' => 'Closed'
+];
+
+// Fetch dynamic contact details from the database
+$page_name_db = "contact_us";
+$sql_fetch = "SELECT content FROM page_content WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
+$result_fetch = mysqli_query($conn, $sql_fetch);
+if ($result_fetch && mysqli_num_rows($result_fetch) > 0) {
+    $row = mysqli_fetch_assoc($result_fetch);
+    $db_details = json_decode($row['content'], true);
+    // Merge with default to ensure all keys exist
+    $contact_details = array_merge($contact_details, $db_details ?? []);
+}
+if($result_fetch) mysqli_free_result($result_fetch);
+
 
 $form_msg = "";
 $form_error_msg = "";
 
-// Basic form submission handling (will be expanded in a later step)
+// Form submission handling
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
-    // This is a placeholder for the actual form submission logic,
-    // which will be implemented in step 17: Frontend - Forms Implementation.
-// This is a placeholder for the actual form submission logic,
-    // which will be implemented in step 17: Frontend - Forms Implementation.
-
-    require_once '../../includes/db.php'; // Path to DB from public/contact/index.php
-
+    // The DB connection is already open. We need to make sure we don't try to open it again.
+    // We will also not close it here, but let the script end to close it or close it in the footer.
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -66,12 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
         } else {
             $form_error_msg = "Sorry, there was an error submitting your inquiry. Please try again later. Error: " . mysqli_error($conn);
         }
-        mysqli_close($conn);
-    } else {
-        // If validation fails, connection might not have been opened or needs to be closed if opened.
-        if (isset($conn) && $conn) {
-            mysqli_close($conn);
-        }
+        // Let the script close the connection at the end
     }
 }
 ?>
@@ -123,18 +138,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
         <div class="col-md-5">
             <h2>Our Contact Information</h2>
             <address>
-                <strong>[NGO Name]</strong><br>
-                123 Philanthropy Drive<br>
-                Cityville, State 54321<br>
-                Country
+                <strong><?php echo htmlspecialchars($contact_details['ngo_name']); ?></strong><br>
+                <?php echo htmlspecialchars($contact_details['address']); ?><br>
+                <?php echo htmlspecialchars($contact_details['city_state_zip']); ?><br>
+                <?php echo htmlspecialchars($contact_details['country']); ?>
             </address>
-            <p><i class="fas fa-phone mr-2"></i> (123) 456-7890</p>
-            <p><i class="fas fa-envelope mr-2"></i> <a href="mailto:info@ngoname.org">info@ngoname.org</a></p>
-            <p><i class="fas fa-globe mr-2"></i> <a href="<?php echo rtrim($path_to_base_url_for_assets, '/'); ?>/index.php">www.ngoname.org</a></p>
+            <p><i class="fas fa-phone mr-2"></i> <?php echo htmlspecialchars($contact_details['phone']); ?></p>
+            <p><i class="fas fa-envelope mr-2"></i> <a href="mailto:<?php echo htmlspecialchars($contact_details['email']); ?>"><?php echo htmlspecialchars($contact_details['email']); ?></a></p>
+            <p><i class="fas fa-globe mr-2"></i> <a href="http://<?php echo htmlspecialchars($contact_details['website']); ?>" target="_blank"><?php echo htmlspecialchars($contact_details['website']); ?></a></p>
 
             <h3 class="mt-4">Office Hours</h3>
-            <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
-            <p>Saturday - Sunday: Closed</p>
+            <p>Monday - Friday: <?php echo htmlspecialchars($contact_details['office_hours_mf']); ?></p>
+            <p>Saturday - Sunday: <?php echo htmlspecialchars($contact_details['office_hours_ss']); ?></p>
 
             <!-- Placeholder for Google Map -->
             <div class="mt-4">

@@ -3,12 +3,27 @@ $page_title = "About Us";
 require_once 'includes/header.php';
 require_once '../includes/db.php';
 
-$about_content = "Learn more about our mission, vision, and the dedicated team behind [NGO Name]. This content will be updated from the database.";
+// Default structure for about us content
+$about_content = [
+    'introduction' => 'Welcome to our organization. Learn more about our work and impact.',
+    'vision' => 'A world where every person has the opportunity to achieve their fullest potential.',
+    'mission' => 'To empower communities through education, healthcare, and sustainable development.',
+    'philosophy' => 'We believe in collaboration, transparency, and sustainable change.',
+    'history' => 'Founded in [Year], our organization has been dedicated to making a difference for over [X] years.'
+];
+
+// Fetch and decode About Us content
 $sql_page_content = "SELECT content FROM page_content WHERE page_name = 'about_us'";
 $result_page_content = mysqli_query($conn, $sql_page_content);
 if ($result_page_content && mysqli_num_rows($result_page_content) > 0) {
     $row_content = mysqli_fetch_assoc($result_page_content);
-    $about_content = !empty($row_content['content']) ? $row_content['content'] : $about_content;
+    $db_content = json_decode($row_content['content'], true);
+    if (is_array($db_content)) {
+        $about_content = array_merge($about_content, $db_content);
+    } elseif (!empty($row_content['content'])) {
+        // Handle legacy string content
+        $about_content['introduction'] = $row_content['content'];
+    }
 }
 if($result_page_content) mysqli_free_result($result_page_content);
 
@@ -43,23 +58,48 @@ mysqli_close($conn);
 </div>
 
 <div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <?php echo nl2br(htmlspecialchars_decode($about_content)); // Use htmlspecialchars_decode if content has HTML ?>
+    <section id="introduction" class="mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Introduction</h2>
+                <p><?php echo nl2br(htmlspecialchars($about_content['introduction'])); ?></p>
+            </div>
         </div>
-    </div>
+    </section>
 
     <hr class="my-5">
 
     <section id="mission-vision" class="mb-5">
-        <div class="row">
+        <div class="row text-center">
             <div class="col-md-6">
-                <h3>Our Mission</h3>
-                <p><em>Placeholder:</em> To empower underprivileged communities through sustainable development initiatives in education, health, and livelihood, fostering a society where every individual has the opportunity to achieve their full potential.</p>
+                <h3><i class="fas fa-bullseye mr-2"></i>Our Mission</h3>
+                <p><?php echo nl2br(htmlspecialchars($about_content['mission'])); ?></p>
             </div>
             <div class="col-md-6">
-                <h3>Our Vision</h3>
-                <p><em>Placeholder:</em> A world where compassion and collective action create equitable opportunities for all, leading to thriving, self-reliant communities and a just global society.</p>
+                <h3><i class="fas fa-eye mr-2"></i>Our Vision</h3>
+                <p><?php echo nl2br(htmlspecialchars($about_content['vision'])); ?></p>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <section id="philosophy" class="mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Our Philosophy</h2>
+                <p><?php echo nl2br(htmlspecialchars($about_content['philosophy'])); ?></p>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <section id="history" class="mb-5">
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Our History</h2>
+                <p><?php echo nl2br(htmlspecialchars($about_content['history'])); ?></p>
             </div>
         </div>
     </section>

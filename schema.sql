@@ -136,7 +136,13 @@ INSERT INTO `admin_users` (`username`, `password`) VALUES ('admin', 'admin');
 
 -- Initial content for home and about pages
 INSERT INTO `page_content` (`page_name`, `content`) VALUES ('home', 'Welcome to our NGO! This is the default home page content. Please update it from the admin panel.');
-INSERT INTO `page_content` (`page_name`, `content`) VALUES ('about_us', 'This is the default About Us page content. Learn more about our mission and vision here. Please update it from the admin panel.');
+INSERT INTO `page_content` (`page_name`, `content`) VALUES ('about_us', '{
+    "introduction": "This is the default introduction. Welcome to our organization! We are dedicated to making a positive impact in the community by focusing on key areas such as education, health, and sustainable development. Our team works tirelessly to create and support programs that empower individuals and build a better future for everyone.",
+    "vision": "Our vision is to create a world where every individual has the opportunity to achieve their full potential and live with dignity and respect. We envision a global community that is equitable, just, and sustainable for all.",
+    "mission": "Our mission is to empower underprivileged communities through targeted initiatives in education, healthcare, and livelihood. We strive to foster a society where collective action and compassion lead to self-reliant and thriving communities.",
+    "philosophy": "We believe in a holistic and community-centric approach. Our philosophy is rooted in the principles of collaboration, transparency, and sustainability. We work hand-in-hand with local partners to ensure our efforts are culturally sensitive and create lasting change.",
+    "history": "Founded in 2010, our organization was born out of a desire to address pressing social challenges. From humble beginnings, we have grown into a trusted non-profit that has touched the lives of thousands through various successful projects and initiatives over the past decade."
+}');
 
 -- Blog Categories Table
 CREATE TABLE `blog_categories` (

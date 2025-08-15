@@ -3,59 +3,66 @@ require_once '../includes/auth_check.php';
 require_once '../includes/db.php';
 
 $page_title = "Edit About Us Page Content";
-$page_name_db = "about_us"; // Identifier for this page in the database
+$page_name_db = "about_us";
 $msg = "";
 $error_msg = "";
-$content = "";
+
+// Default structure for about us content
+$about_us_default = [
+    'introduction' => 'Default introduction text. Please update this.',
+    'vision' => 'Default vision text. Please update this.',
+    'mission' => 'Default mission text. Please update this.',
+    'philosophy' => 'Default philosophy text. Please update this.',
+    'history' => 'Default history text. Please update this.'
+];
 
 // Fetch existing content
 $sql_fetch = "SELECT content FROM page_content WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
 $result_fetch = mysqli_query($conn, $sql_fetch);
+
 if ($result_fetch && mysqli_num_rows($result_fetch) > 0) {
     $row = mysqli_fetch_assoc($result_fetch);
-    $content = $row['content'];
-} elseif ($result_fetch) {
-    // Page entry doesn't exist, create it with placeholder
-    $placeholder_content = "Default About Us Page Content. Please edit this.";
-    $sql_insert_placeholder = "INSERT INTO page_content (page_name, content) VALUES ('" . sanitize_input($conn, $page_name_db) . "', '" . sanitize_input($conn, $placeholder_content) . "')";
+    $about_content = json_decode($row['content'], true);
+
+    // Check if content is a string (legacy) or null/invalid JSON, then convert
+    if (!is_array($about_content)) {
+        $legacy_content = $about_content; // Keep the old text for the introduction
+        $about_content = $about_us_default;
+        if (!empty($legacy_content) && is_string($legacy_content)) {
+            $about_content['introduction'] = $legacy_content;
+        }
+    } else {
+        // Ensure all keys from default are present
+        $about_content = array_merge($about_us_default, $about_content);
+    }
+} else {
+    $about_content = $about_us_default;
+    $json_content_default = json_encode($about_us_default, JSON_PRETTY_PRINT);
+    $sql_insert_placeholder = "INSERT INTO page_content (page_name, content) VALUES ('" . sanitize_input($conn, $page_name_db) . "', '" . sanitize_input($conn, $json_content_default) . "')";
     if(mysqli_query($conn, $sql_insert_placeholder)) {
-        $content = $placeholder_content;
-        $msg = "Initial content placeholder created. Please edit below.";
+        $msg = "Initial About Us content created. Please edit below.";
     } else {
         $error_msg = "Error creating placeholder content: " . mysqli_error($conn);
     }
-} else {
-    $error_msg = "Error fetching page content: " . mysqli_error($conn);
 }
 if($result_fetch) mysqli_free_result($result_fetch);
 
-
 // Handle content update
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST['page_content_update'])) {
-        $new_content = sanitize_input($conn, $_POST['content_area']); // Sanitize what goes into DB
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['about_content_update'])) {
+    $updated_content = [];
+    foreach ($about_us_default as $key => $default_value) {
+        $updated_content[$key] = $_POST[$key] ?? $default_value;
+    }
 
-        $check_sql = "SELECT id FROM page_content WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
-        $check_result = mysqli_query($conn, $check_sql);
+    $json_content = json_encode($updated_content, JSON_PRETTY_PRINT);
+    $json_content_db = sanitize_input($conn, $json_content);
 
-        if ($check_result && mysqli_num_rows($check_result) > 0) {
-            $update_sql = "UPDATE page_content SET content = '" . $new_content . "' WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
-            if (mysqli_query($conn, $update_sql)) {
-                $msg = "About Us page content updated successfully!";
-                $content = $_POST['content_area'];
-            } else {
-                $error_msg = "Error updating content: " . mysqli_error($conn);
-            }
-        } else {
-            $insert_sql = "INSERT INTO page_content (page_name, content) VALUES ('" . sanitize_input($conn, $page_name_db) . "', '" . $new_content . "')";
-            if (mysqli_query($conn, $insert_sql)) {
-                $msg = "About Us page content saved successfully!";
-                $content = $_POST['content_area'];
-            } else {
-                $error_msg = "Error saving new content: " . mysqli_error($conn);
-            }
-        }
-        if($check_result) mysqli_free_result($check_result);
+    $sql_update = "UPDATE page_content SET content = '{$json_content_db}' WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
+    if (mysqli_query($conn, $sql_update)) {
+        $msg = "About Us page content updated successfully!";
+        $about_content = $updated_content;
+    } else {
+        $error_msg = "Error updating content: " . mysqli_error($conn);
     }
 }
 
@@ -88,24 +95,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="card-body">
                 <?php if (!empty($msg)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert"><?php echo $msg; ?>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert"><?php echo $msg; ?><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                 <?php endif; ?>
                 <?php if (!empty($error_msg)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert"><?php echo $error_msg; ?>
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert"><?php echo $error_msg; ?><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
                 <?php endif; ?>
 
                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                     <div class="form-group">
-                        <label for="content_area">Page Content</label>
-                        <textarea class="form-control" id="content_area" name="content_area" rows="15"><?php echo htmlspecialchars($content); ?></textarea>
-                        <small class="form-text text-muted">You can use basic HTML tags for formatting. Ensure your HTML is valid.</small>
+                        <label for="introduction">Introduction</label>
+                        <textarea class="form-control" id="introduction" name="introduction" rows="5"><?php echo htmlspecialchars($about_content['introduction']); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="vision">Vision</label>
+                        <textarea class="form-control" id="vision" name="vision" rows="3"><?php echo htmlspecialchars($about_content['vision']); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mission">Mission</label>
+                        <textarea class="form-control" id="mission" name="mission" rows="3"><?php echo htmlspecialchars($about_content['mission']); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="philosophy">Philosophy</label>
+                        <textarea class="form-control" id="philosophy" name="philosophy" rows="5"><?php echo htmlspecialchars($about_content['philosophy']); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="history">History</label>
+                        <textarea class="form-control" id="history" name="history" rows="5"><?php echo htmlspecialchars($about_content['history']); ?></textarea>
                     </div>
 
-                    <button type="submit" name="page_content_update" class="btn btn-primary">Save Content</button>
+                    <button type="submit" name="about_content_update" class="btn btn-primary">Save Content</button>
                 </form>
             </div>
         </div>

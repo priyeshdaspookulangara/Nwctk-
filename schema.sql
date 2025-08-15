@@ -137,6 +137,7 @@ INSERT INTO `admin_users` (`username`, `password`) VALUES ('admin', 'admin');
 -- Initial content for home and about pages
 INSERT INTO `page_content` (`page_name`, `content`) VALUES ('home', 'Welcome to our NGO! This is the default home page content. Please update it from the admin panel.');
 INSERT INTO `page_content` (`page_name`, `content`) VALUES ('about_us', 'This is the default About Us page content. Learn more about our mission and vision here. Please update it from the admin panel.');
+INSERT INTO `page_content` (`page_name`, `content`) VALUES ('contact', '{"ngo_name":"[NGO Name]","address":"123 Philanthropy Drive\\nCityville, State 54321\\nCountry","phone":"(123) 456-7890","email":"info@ngoname.org","website":"www.ngoname.org","office_hours_line1":"Monday - Friday: 9:00 AM - 5:00 PM","office_hours_line2":"Saturday - Sunday: Closed"}');
 
 -- Blog Categories Table
 CREATE TABLE `blog_categories` (

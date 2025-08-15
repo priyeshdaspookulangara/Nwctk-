@@ -20,6 +20,7 @@
             <ul class="collapse list-unstyled" id="contentManagementSubmenu">
                 <li><a href="edit_home_content.php">Home Page</a></li>
                 <li><a href="edit_about_content.php">About Us Page</a></li>
+                <li><a href="edit_contact_content.php">Contact Page</a></li>
             </ul>
         </li>
         <li>

@@ -2,22 +2,35 @@
 $page_title = "Contact Us";
 // The header include path needs to be adjusted because this file is in a subdirectory
 require_once '../includes/header.php';
-// Database connection (if needed for this page, e.g., for dynamic contact info)
-// For now, the form submission will be handled by a separate PHP script or this page itself.
-// require_once '../../includes/db.php'; // Path to DB from public/contact/index.php
+require_once '../../includes/db.php'; // Path to DB from public/contact/index.php
+
+$page_name_db = "contact";
+$contact_info = [
+    'ngo_name' => '[NGO Name]',
+    'address' => "123 Philanthropy Drive<br>Cityville, State 54321<br>Country",
+    'phone' => '(123) 456-7890',
+    'email' => 'info@ngoname.org',
+    'website' => 'www.ngoname.org',
+    'office_hours_line1' => 'Monday - Friday: 9:00 AM - 5:00 PM',
+    'office_hours_line2' => 'Saturday - Sunday: Closed'
+];
+
+$sql_fetch = "SELECT content FROM page_content WHERE page_name = '" . sanitize_input($conn, $page_name_db) . "'";
+$result_fetch = mysqli_query($conn, $sql_fetch);
+if ($result_fetch && mysqli_num_rows($result_fetch) > 0) {
+    $row = mysqli_fetch_assoc($result_fetch);
+    $decoded_content = json_decode($row['content'], true);
+    if (is_array($decoded_content)) {
+        $contact_info = array_merge($contact_info, $decoded_content);
+    }
+}
+if($result_fetch) mysqli_free_result($result_fetch);
 
 $form_msg = "";
 $form_error_msg = "";
 
-// Basic form submission handling (will be expanded in a later step)
+// Basic form submission handling
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
-    // This is a placeholder for the actual form submission logic,
-    // which will be implemented in step 17: Frontend - Forms Implementation.
-// This is a placeholder for the actual form submission logic,
-    // which will be implemented in step 17: Frontend - Forms Implementation.
-
-    require_once '../../includes/db.php'; // Path to DB from public/contact/index.php
-
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -25,55 +38,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
     $message = trim($_POST['message'] ?? '');
 
     // Validation
-    if (empty($name)) {
-        $form_error_msg .= "Full Name is required.<br>";
-    }
-    if (empty($email)) {
-        $form_error_msg .= "Email Address is required.<br>";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $form_error_msg .= "Invalid Email Address format.<br>";
-    }
-    if (empty($message)) {
-        $form_error_msg .= "Message is required.<br>";
-    }
-    // Basic length check for subject as an example
-    if (!empty($subject) && strlen($subject) > 255) {
-        $form_error_msg .= "Subject is too long (max 255 characters).<br>";
-    }
-
+    if (empty($name)) $form_error_msg .= "Full Name is required.<br>";
+    if (empty($email)) $form_error_msg .= "Email Address is required.<br>";
+    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $form_error_msg .= "Invalid Email Address format.<br>";
+    if (empty($message)) $form_error_msg .= "Message is required.<br>";
+    if (!empty($subject) && strlen($subject) > 255) $form_error_msg .= "Subject is too long (max 255 characters).<br>";
 
     if (empty($form_error_msg)) {
-        // Sanitize inputs for DB
         $name_db = sanitize_input($conn, $name);
         $email_db = sanitize_input($conn, $email);
         $phone_db = sanitize_input($conn, $phone);
         $subject_db = sanitize_input($conn, $subject);
         $message_db = sanitize_input($conn, $message);
 
-        $sql = "INSERT INTO inquiries (name, email, phone, subject, message, status, submitted_at) VALUES (
-                '" . $name_db . "',
-                '" . $email_db . "',
-                '" . $phone_db . "',
-                '" . $subject_db . "',
-                '" . $message_db . "',
-                'new',
-                NOW()
-            )";
+        $sql = "INSERT INTO inquiries (name, email, phone, subject, message, status, submitted_at) VALUES (?, ?, ?, ?, ?, 'new', NOW())";
 
-        if (mysqli_query($conn, $sql)) {
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sssss", $name_db, $email_db, $phone_db, $subject_db, $message_db);
+
+        if (mysqli_stmt_execute($stmt)) {
             $form_msg = "Thank you for your inquiry! We have received your message and will get back to you soon.";
-            $_POST = []; // Clear form fields on success
+            $_POST = [];
         } else {
-            $form_error_msg = "Sorry, there was an error submitting your inquiry. Please try again later. Error: " . mysqli_error($conn);
+            $form_error_msg = "Sorry, there was an error submitting your inquiry. Please try again later.";
         }
-        mysqli_close($conn);
-    } else {
-        // If validation fails, connection might not have been opened or needs to be closed if opened.
-        if (isset($conn) && $conn) {
-            mysqli_close($conn);
-        }
+        mysqli_stmt_close($stmt);
     }
 }
+mysqli_close($conn);
 ?>
 
 <div class="page-header">
@@ -123,18 +115,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_inquiry'])) {
         <div class="col-md-5">
             <h2>Our Contact Information</h2>
             <address>
-                <strong>[NGO Name]</strong><br>
-                123 Philanthropy Drive<br>
-                Cityville, State 54321<br>
-                Country
+                <strong><?php echo htmlspecialchars($contact_info['ngo_name']); ?></strong><br>
+                <?php echo nl2br(htmlspecialchars($contact_info['address'])); ?>
             </address>
-            <p><i class="fas fa-phone mr-2"></i> (123) 456-7890</p>
-            <p><i class="fas fa-envelope mr-2"></i> <a href="mailto:info@ngoname.org">info@ngoname.org</a></p>
-            <p><i class="fas fa-globe mr-2"></i> <a href="<?php echo rtrim($path_to_base_url_for_assets, '/'); ?>/index.php">www.ngoname.org</a></p>
+            <p><i class="fas fa-phone mr-2"></i> <?php echo htmlspecialchars($contact_info['phone']); ?></p>
+            <p><i class="fas fa-envelope mr-2"></i> <a href="mailto:<?php echo htmlspecialchars($contact_info['email']); ?>"><?php echo htmlspecialchars($contact_info['email']); ?></a></p>
+            <p><i class="fas fa-globe mr-2"></i> <a href="http://<?php echo htmlspecialchars($contact_info['website']); ?>" target="_blank"><?php echo htmlspecialchars($contact_info['website']); ?></a></p>
 
             <h3 class="mt-4">Office Hours</h3>
-            <p>Monday - Friday: 9:00 AM - 5:00 PM</p>
-            <p>Saturday - Sunday: Closed</p>
+            <p><?php echo htmlspecialchars($contact_info['office_hours_line1']); ?></p>
+            <p><?php echo htmlspecialchars($contact_info['office_hours_line2']); ?></p>
 
             <!-- Placeholder for Google Map -->
             <div class="mt-4">

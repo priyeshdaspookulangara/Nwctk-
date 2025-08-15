@@ -1,7 +1,11 @@
 <?php
 $page_title = "Donations";
+
+// Define the project root directory for robust includes
+define('PROJECT_ROOT', dirname(__DIR__, 2));
+
 require_once '../includes/header.php';
-require_once '../../includes/db.php'; // Path is different now, from public/donate/ to root includes/
+require_once PROJECT_ROOT . '/includes/db.php';
 
 $donations_content = "";
 $page_name_db = 'donations';
@@ -14,8 +18,9 @@ if ($result && mysqli_num_rows($result) > 0) {
     $row = mysqli_fetch_assoc($result);
     $donations_content = $row['content'];
 } else {
-    // Fallback content if nothing is found in the database
-    $donations_content = '<div class="alert alert-warning">Content for this page is not available yet. Please check back later.</div>';
+    // Fallback content if nothing is found in the database.
+    // This could also be because the admin page hasn't been visited yet to create the initial content.
+    $donations_content = '<div class="alert alert-warning">The content for this page is managed by the admin panel, but it has not been set up yet. Please check back later.</div>';
 }
 mysqli_close($conn);
 ?>

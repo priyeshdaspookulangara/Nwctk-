@@ -1,25 +1,67 @@
 <?php
 $page_title = "Home";
 require_once 'includes/header.php';
-// Later, we will fetch dynamic content from `page_content` table for 'home'
-require_once '../includes/db.php'; // Path to DB from public/index.php
+require_once '../includes/db.php';
 
-$home_content = "Welcome to our NGO! This is the default home page content. It will be replaced by dynamic content from the database soon.";
+// Fetch banners
+$banners = [];
+$sql_banners = "SELECT image_url, heading, sub_heading, link FROM banners ORDER BY display_order ASC";
+$result_banners = mysqli_query($conn, $sql_banners);
+if ($result_banners) {
+    while ($row = mysqli_fetch_assoc($result_banners)) {
+        $banners[] = $row;
+    }
+    mysqli_free_result($result_banners);
+}
+
+// Fetch home page content
+$home_content = "Welcome to our NGO! Default content.";
 $sql_page_content = "SELECT content FROM page_content WHERE page_name = 'home'";
 $result_page_content = mysqli_query($conn, $sql_page_content);
 if ($result_page_content && mysqli_num_rows($result_page_content) > 0) {
     $row_content = mysqli_fetch_assoc($result_page_content);
     $home_content = !empty($row_content['content']) ? $row_content['content'] : $home_content;
 }
+if ($result_page_content) {
+    mysqli_free_result($result_page_content);
+}
 mysqli_close($conn);
 ?>
 
+<?php if (!empty($banners)): ?>
+<div id="heroCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        <?php foreach ($banners as $index => $banner): ?>
+        <li data-target="#heroCarousel" data-slide-to="<?php echo $index; ?>" class="<?php echo $index == 0 ? 'active' : ''; ?>"></li>
+        <?php endforeach; ?>
+    </ol>
+    <div class="carousel-inner">
+        <?php foreach ($banners as $index => $banner): ?>
+        <div class="carousel-item <?php echo $index == 0 ? 'active' : ''; ?>" style="background-image: url('<?php echo htmlspecialchars(ltrim($banner['image_url'], '/')); ?>');">
+            <div class="hero-content">
+                <h1 class="hero-title"><?php echo htmlspecialchars($banner['heading']); ?></h1>
+                <a href="<?php echo htmlspecialchars($banner['link']); ?>" class="hero-subtitle"><?php echo htmlspecialchars($banner['sub_heading']); ?></a>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <a class="carousel-control-prev" href="#heroCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#heroCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
+<?php else: ?>
 <div class="page-header">
     <div class="container">
         <h1>Welcome to [NGO Name]</h1>
         <p class="lead">Making a difference, one step at a time.</p>
     </div>
 </div>
+<?php endif; ?>
 
 <div class="container mt-4">
     <div class="row">

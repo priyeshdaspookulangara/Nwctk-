@@ -13,6 +13,16 @@
             </a>
         </li>
         <li>
+            <a href="#bannerManagementSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                <i class="fas fa-images"></i>
+                Banners
+            </a>
+            <ul class="collapse list-unstyled" id="bannerManagementSubmenu">
+                <li><a href="manage_banners.php">Manage Banners</a></li>
+                <li><a href="add_banner.php">Add Banner</a></li>
+            </ul>
+        </li>
+        <li>
             <a href="#contentManagementSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                 <i class="fas fa-file-alt"></i>
                 Page Content

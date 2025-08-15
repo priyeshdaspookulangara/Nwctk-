@@ -158,3 +158,13 @@ CREATE TABLE `blog_posts` (
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL
 );
+
+CREATE TABLE `banners` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `image_url` VARCHAR(255) NOT NULL,
+  `heading` VARCHAR(255) NOT NULL,
+  `sub_heading` VARCHAR(255) NOT NULL,
+  `link` VARCHAR(255) NOT NULL,
+  `display_order` INT DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -78,6 +78,62 @@ body {
     opacity: 0.9;
 }
 
+/* Hero Carousel */
+#heroCarousel {
+    height: 60vh; /* Adjust height as needed */
+    max-height: 500px;
+    width: 100%;
+}
+.carousel-item {
+    height: 60vh; /* Same as carousel height */
+    max-height: 500px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+.carousel-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+}
+.hero-content {
+    position: relative; /* To be on top of the overlay */
+    z-index: 1;
+    padding: 20px;
+}
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+}
+.hero-subtitle {
+    font-size: 1.5rem;
+    font-weight: 300;
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    background: rgba(0, 123, 255, 0.8);
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+.hero-subtitle:hover {
+    background: rgba(0, 123, 255, 1);
+    color: white;
+    text-decoration: none;
+}
+
 
 /* Cards customization */
 .card {

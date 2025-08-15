@@ -93,7 +93,7 @@ mysqli_close($conn);
     <section id="donation" class="text-center bg-primary text-white p-5 rounded">
         <h2>Support Our Cause</h2>
         <p class="lead">Your contribution can make a significant impact on the lives of many.</p>
-        <a href="donations.php" class="btn btn-lg btn-light">Donate Now</a>
+        <a href="donate/" class="btn btn-lg btn-light">Donate Now</a>
     </section>
 </div>
 

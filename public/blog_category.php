@@ -34,10 +34,11 @@ require_once 'includes/header.php';
 
 
 $posts = [];
-$sql_posts = "SELECT bp.id, bp.title, bp.content, bp.image_url, bp.author, bp.created_at, bc.name as category_name, bc.id as category_id
+$sql_posts = "SELECT bp.id, bp.title, bp.content, bp.image_url, u.username as author_name, bp.created_at, bc.name as category_name, bc.id as category_id
         FROM blog_posts bp
         LEFT JOIN blog_categories bc ON bp.category_id = bc.id
-        WHERE bp.category_id = ?
+        JOIN users u ON bp.author_id = u.id
+        WHERE bp.category_id = ? AND bp.status = 'published'
         ORDER BY bp.created_at DESC";
 if ($stmt_posts = mysqli_prepare($conn, $sql_posts)) {
     mysqli_stmt_bind_param($stmt_posts, "i", $category_id);
@@ -45,10 +46,10 @@ if ($stmt_posts = mysqli_prepare($conn, $sql_posts)) {
     $result_posts = mysqli_stmt_get_result($stmt_posts);
     if ($result_posts) {
         while ($row = mysqli_fetch_assoc($result_posts)) {
-            if (strpos($row['image_url'], '../public/') === 0) {
+            if (strpos($row['image_url'], 'uploads/') !== false) {
+                // Path is already good
+            } elseif (strpos($row['image_url'], '../public/') === 0) {
                 $row['image_url'] = substr($row['image_url'], strlen('../public/'));
-            } elseif (strpos($row['image_url'], 'public/') === 0) {
-                 $row['image_url'] = substr($row['image_url'], strlen('public/'));
             }
             $posts[] = $row;
         }
@@ -92,8 +93,8 @@ mysqli_close($conn);
                                     <p class="card-text">
                                         <small class="text-muted">
                                             Published on: <?php echo date("F j, Y", strtotime($post['created_at'])); ?>
-                                            <?php if (!empty($post['author'])): ?>
-                                                | Author: <?php echo htmlspecialchars($post['author']); ?>
+                                            <?php if (!empty($post['author_name'])): ?>
+                                                | Author: <?php echo htmlspecialchars($post['author_name']); ?>
                                             <?php endif; ?>
                                         </small>
                                     </p>

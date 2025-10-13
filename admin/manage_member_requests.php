@@ -10,22 +10,86 @@ $error_msg = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['request_id']) && isset($_POST['action'])) {
         $request_id = filter_input(INPUT_POST, 'request_id', FILTER_VALIDATE_INT);
-        $action = sanitize_input($conn, $_POST['action']); // 'approve', 'reject', 'pending', 'delete'
+        $action = $_POST['action']; // No need to sanitize, checked against a list
 
         if ($request_id) {
             if ($action === 'delete') {
-                $sql = "DELETE FROM member_requests WHERE id = " . $request_id;
-                if (mysqli_query($conn, $sql)) {
-                    $msg = "Request deleted successfully.";
-                } else {
-                    $error_msg = "Error deleting request: " . mysqli_error($conn);
+                $sql = "DELETE FROM member_requests WHERE id = ?";
+                if ($stmt = mysqli_prepare($conn, $sql)) {
+                    mysqli_stmt_bind_param($stmt, "i", $request_id);
+                    if (mysqli_stmt_execute($stmt)) {
+                        $msg = "Request deleted successfully.";
+                    } else {
+                        $error_msg = "Error deleting request: " . mysqli_stmt_error($stmt);
+                    }
+                    mysqli_stmt_close($stmt);
                 }
-            } elseif (in_array($action, ['pending', 'approved', 'rejected'])) {
-                $sql = "UPDATE member_requests SET status = '" . $action . "' WHERE id = " . $request_id;
-                if (mysqli_query($conn, $sql)) {
-                    $msg = "Request status updated to '" . ucfirst($action) . "'.";
+            } elseif ($action === 'approved') {
+                // --- Start of User Creation Logic ---
+
+                // 1. Fetch request details
+                $sql_get_request = "SELECT full_name, email FROM member_requests WHERE id = ?";
+                $stmt_get_request = mysqli_prepare($conn, $sql_get_request);
+                mysqli_stmt_bind_param($stmt_get_request, "i", $request_id);
+                mysqli_stmt_execute($stmt_get_request);
+                $result_request = mysqli_stmt_get_result($stmt_get_request);
+                $request_data = mysqli_fetch_assoc($result_request);
+                mysqli_stmt_close($stmt_get_request);
+
+                if ($request_data) {
+                    $email = $request_data['email'];
+
+                    // 2. Check if user already exists
+                    $sql_check_user = "SELECT id FROM users WHERE email = ?";
+                    $stmt_check_user = mysqli_prepare($conn, $sql_check_user);
+                    mysqli_stmt_bind_param($stmt_check_user, "s", $email);
+                    mysqli_stmt_execute($stmt_check_user);
+                    mysqli_stmt_store_result($stmt_check_user);
+
+                    if (mysqli_stmt_num_rows($stmt_check_user) == 0) {
+                        // 3. Generate username and password
+                        $username = strstr($email, '@', true) . rand(10, 99);
+                        $temp_password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 10);
+                        $hashed_password = password_hash($temp_password, PASSWORD_DEFAULT);
+                        $role = 'member';
+
+                        // 4. Insert new user
+                        $sql_insert_user = "INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)";
+                        $stmt_insert_user = mysqli_prepare($conn, $sql_insert_user);
+                        mysqli_stmt_bind_param($stmt_insert_user, "ssss", $username, $email, $hashed_password, $role);
+
+                        if (mysqli_stmt_execute($stmt_insert_user)) {
+                            // 5. Update request status
+                            $sql_update_status = "UPDATE member_requests SET status = 'approved' WHERE id = ?";
+                            $stmt_update_status = mysqli_prepare($conn, $sql_update_status);
+                            mysqli_stmt_bind_param($stmt_update_status, "i", $request_id);
+                            mysqli_stmt_execute($stmt_update_status);
+                            mysqli_stmt_close($stmt_update_status);
+
+                            $msg = "Request approved. User account created with<br><strong>Username:</strong> " . htmlspecialchars($username) . "<br><strong>Temporary Password:</strong> " . htmlspecialchars($temp_password) . "<br>Please instruct the user to change their password upon first login.";
+                        } else {
+                            $error_msg = "Failed to create user account.";
+                        }
+                        mysqli_stmt_close($stmt_insert_user);
+                    } else {
+                        $error_msg = "A user with this email already exists. Cannot create a new account. You can approve the request without creating a user account by manually updating the status in the database.";
+                    }
+                    mysqli_stmt_close($stmt_check_user);
                 } else {
-                    $error_msg = "Error updating status: " . mysqli_error($conn);
+                    $error_msg = "Could not find the original request.";
+                }
+                // --- End of User Creation Logic ---
+
+            } elseif (in_array($action, ['pending', 'rejected'])) {
+                $sql = "UPDATE member_requests SET status = ? WHERE id = ?";
+                if ($stmt = mysqli_prepare($conn, $sql)) {
+                    mysqli_stmt_bind_param($stmt, "si", $action, $request_id);
+                    if (mysqli_stmt_execute($stmt)) {
+                        $msg = "Request status updated to '" . ucfirst($action) . "'.";
+                    } else {
+                        $error_msg = "Error updating status: " . mysqli_stmt_error($stmt);
+                    }
+                    mysqli_stmt_close($stmt);
                 }
             } else {
                 $error_msg = "Invalid action specified.";

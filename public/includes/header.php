@@ -1,4 +1,9 @@
 <?php
+// Start session if not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Define a base URL if not already defined (useful for absolute paths in links/css/js)
 if (!defined('BASE_URL')) {
     // Auto-detect scheme, host. For subdirectories, adjust accordingly.
@@ -170,6 +175,26 @@ if (basename(dirname($_SERVER['PHP_SELF'])) === 'contact' && $current_page === '
                 <li class="nav-item <?php echo ($current_page == 'contact') ? 'active' : ''; ?>">
                     <a class="nav-link" href="<?php echo $path_to_base_url_for_assets; ?>contact/">Contact Us</a>
                 </li>
+                <li class="nav-item border-left ml-2"></li>
+                <?php if (isset($_SESSION["user_loggedin"]) && $_SESSION["user_loggedin"] === true): ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($_SESSION["user_username"]); ?>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUserDropdown">
+                            <a class="dropdown-item" href="<?php echo $path_to_base_url_for_assets; ?>dashboard.php">Dashboard</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="<?php echo $path_to_base_url_for_assets; ?>logout.php">Logout</a>
+                        </div>
+                    </li>
+                <?php else: ?>
+                    <li class="nav-item <?php echo ($current_page == 'login.php') ? 'active' : ''; ?>">
+                        <a class="nav-link" href="<?php echo $path_to_base_url_for_assets; ?>login.php">Login</a>
+                    </li>
+                    <li class="nav-item <?php echo ($current_page == 'register.php') ? 'active' : ''; ?>">
+                        <a class="nav-link btn btn-primary btn-sm text-white" href="<?php echo $path_to_base_url_for_assets; ?>register.php">Register</a>
+                    </li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>

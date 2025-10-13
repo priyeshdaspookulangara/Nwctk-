@@ -149,11 +149,45 @@ CREATE TABLE `blog_categories` (
 CREATE TABLE `blog_posts` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `category_id` INT,
+  `author_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `content` TEXT NOT NULL,
   `image_url` VARCHAR(255) NULL,
-  `author` VARCHAR(255) NULL,
+  `status` ENUM('draft', 'pending_approval', 'published', 'rejected') DEFAULT 'draft',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL
+  FOREIGN KEY (`category_id`) REFERENCES `blog_categories`(`id`) ON DELETE SET NULL,
+  FOREIGN KEY (`author_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+);
+
+-- Users Table
+CREATE TABLE `users` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `username` VARCHAR(100) NOT NULL UNIQUE,
+  `email` VARCHAR(255) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  `role` ENUM('general', 'member', 'volunteer', 'intern') NOT NULL DEFAULT 'general',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Post Comments Table
+CREATE TABLE `post_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `post_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `comment` TEXT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`post_id`) REFERENCES `blog_posts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+);
+
+-- Post Likes Table
+CREATE TABLE `post_likes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `post_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `post_user_like` (`post_id`, `user_id`),
+  FOREIGN KEY (`post_id`) REFERENCES `blog_posts`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 );

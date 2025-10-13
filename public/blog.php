@@ -4,9 +4,11 @@ require_once 'includes/header.php';
 require_once '../includes/db.php';
 
 $posts = [];
-$sql = "SELECT bp.id, bp.title, bp.content, bp.image_url, bp.author, bp.created_at, bc.name as category_name, bc.id as category_id
+$sql = "SELECT bp.id, bp.title, bp.content, bp.image_url, u.username as author_name, bp.created_at, bc.name as category_name, bc.id as category_id
         FROM blog_posts bp
         LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+        JOIN users u ON bp.author_id = u.id
+        WHERE bp.status = 'published'
         ORDER BY bp.created_at DESC";
 $result = mysqli_query($conn, $sql);
 if ($result && mysqli_num_rows($result) > 0) {
@@ -56,8 +58,8 @@ mysqli_close($conn);
                                         <small class="text-muted">
                                             Published on: <?php echo date("F j, Y", strtotime($post['created_at'])); ?> |
                                             Category: <a href="blog_category.php?id=<?php echo $post['category_id']; ?>"><?php echo htmlspecialchars($post['category_name'] ?? 'Uncategorized'); ?></a>
-                                            <?php if (!empty($post['author'])): ?>
-                                                | Author: <?php echo htmlspecialchars($post['author']); ?>
+                                            <?php if (!empty($post['author_name'])): ?>
+                                                | Author: <?php echo htmlspecialchars($post['author_name']); ?>
                                             <?php endif; ?>
                                         </small>
                                     </p>
